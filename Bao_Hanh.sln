@@ -1,16 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29609.76
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bao_Hanh", "Bao_Hanh\Bao_Hanh.csproj", "{581C63C9-3833-4883-B006-6DA82EE69A6B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DTO", "DTO", "{E0200C5D-EAE9-4814-A057-71C85BD84B34}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Class", "Class", "{D4DA1D59-CB92-4DBF-B377-59CFFF73827D}"
-	ProjectSection(SolutionItems) = preProject
-		Util.cs = Util.cs
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -3,47 +3,20 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using DevExpress.XtraEditors;
 
 namespace Bao_Hanh
 {
-    public partial class frm_QuanLyDichVu : Form
+    public partial class frm_QuanLyNhanVien : DevExpress.XtraEditors.XtraForm
     {
-        public frm_QuanLyDichVu()
+        public frm_QuanLyNhanVien()
         {
             InitializeComponent();
-        }
-
-        private void btn_Save_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btn_Clear_Click(object sender, EventArgs e)
-        {
-            txtMaDichVu.Text = txtTenDV.Text = "";
-            txtGiaDV.Text = "0";
-            cboThoiGianBaoHanh.SelectedIndex = 0;
-            chkTinhTrang.Checked = false;
-        }
-
-        private void frm_QuanLyDichVu_Load(object sender, EventArgs e)
-        {
-            try
-            {
-                for (int i = 0; i < 36; i++)
-                {
-                    cboThoiGianBaoHanh.Properties.Items.Add(i);
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
+            dtp_NgaySinh.DateTime = DateTime.Now.AddYears(-16);
         }
         void LoadData()
         {
@@ -59,6 +32,7 @@ namespace Bao_Hanh
                 MessageBox.Show("Không load được dữ liệu", "Thông báo");
             }
         }
+
         bool KiemTraKhiLuu(string madv, string tendv, string giadv, string thoigianbaohanh)
         {
             if (string.IsNullOrEmpty(madv))
@@ -76,20 +50,45 @@ namespace Bao_Hanh
                 MessageBox.Show("Chưa điền mã dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                 return false;
             }
-            if (string.IsNullOrEmpty(cboThoiGianBaoHanh.Text))
-            {
-                MessageBox.Show("Chưa chọn thời gian bảo hành", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-                return false;
-            }
+           
             return true;
         }
         bool KiemTraTonTai(string madv)
         {
-            string sql = "select * from tbl_DichVu where MaDV = '"+madv+"'";
+            string sql = "select * from tbl_DichVu where MaDV = '" + madv + "'";
             DataTable dt = new DataTable();
             dt = Util.GetData(sql);
             return dt.Rows.Count > 0 ? true : false;
         }
+
+        private void gv_Data_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
+        {
+            try
+            {
+                int row = e.RowHandle;
+                if (row >= 0)
+                {
+                    txt_TenDangNhap.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cTenDangNhap));
+                    txt_MatKhau.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cMatKhau));
+                    txt_HoTen.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cHoTenNV));
+                    txt_SoDienThoai.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cSDT));
+                    txt_DiaChi.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cDiaChi));
+                    dtp_NgaySinh.DateTime = Convert.ToDateTime(gv_Data.GetRowCellValue(row, cNgaySinh));
+                    cbb_GioiTinh.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cGioiTinh));
+                }
+            }
+            catch (Exception  ex)
+            {
+            }
+        }
+
+        private void btn_Clear_Click(object sender, EventArgs e)
+        {
+            txt_TenDangNhap.Text = txt_SoDienThoai.Text = txt_MatKhau.Text = txt_HoTen.Text = txt_DiaChi.Text = "";
+            cbb_GioiTinh.SelectedIndex = 0;
+            dtp_NgaySinh.DateTime = DateTime.Now.AddYears(-16);
+        }
+
         private void btn_Luu_Click(object sender, EventArgs e)
         {
             try
@@ -99,15 +98,15 @@ namespace Bao_Hanh
                 double giadv = Convert.ToDouble(txtGiaDV.Text);
                 int thoigianbh = Convert.ToInt32(cboThoiGianBaoHanh.Text);
                 bool tinhtrang = chkTinhTrang.Checked;
-                if (!KiemTraKhiLuu(madv,tendv,giadv.ToString(),thoigianbh.ToString()))
+                if (!KiemTraKhiLuu(madv, tendv, giadv.ToString(), thoigianbh.ToString()))
                 {
                     //Nếu tồn tại thì thông báo cập nhật thông tin
                     if (KiemTraTonTai(madv))
                     {
-                        if (MessageBox.Show("Thông tin này đã tồn tại, bạn có muốn cập nhật","Thông báo",MessageBoxButtons.YesNo,MessageBoxIcon.Question) == DialogResult.Yes)
+                        if (MessageBox.Show("Thông tin này đã tồn tại, bạn có muốn cập nhật", "Thông báo", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             string sql_capnhat = string.Format("update tbl_DichVu set TenDV = N'{1}', GiaDichVu = {2}, ThoiGianBH = '{3}', TinhTrang = {4} where MaDV = '{0}'",
-                                madv,tendv, giadv, thoigianbh, tinhtrang
+                                madv, tendv, giadv, thoigianbh, tinhtrang
                                 );
                             int capnhat = Util.RunSql(sql_capnhat);
                             if (capnhat > 0)
@@ -139,8 +138,8 @@ namespace Bao_Hanh
                         }
                     }
                 }
-                
-                
+
+
             }
             catch (Exception ex)
             {
@@ -187,11 +186,11 @@ namespace Bao_Hanh
                 string sql = "select * from tbl_DichVu where 1=1 ";
                 if (madv != "")
                 {
-                    sql += "AND MaDV = '"+madv+"'";
+                    sql += "AND MaDV = '" + madv + "'";
                 }
                 if (tendv != "")
                 {
-                    sql += "AND TenDV like N'%"+tendv+"%'";
+                    sql += "AND TenDV like N'%" + tendv + "%'";
                 }
                 DataTable dt = new DataTable();
                 dt = Util.GetData(sql);
@@ -203,31 +202,11 @@ namespace Bao_Hanh
                 {
                     MessageBox.Show("Không tìm thấy dữ liệu", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
-                
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Xảy ra lỗi Tìm kiếm dữ liệu", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void gv_Data_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
-        {
-            try
-            {
-                int row = e.RowHandle;
-                if (row >= 0)
-                {
-                    txtMaDichVu.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cMaDV));
-                    txtTenDV.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cTenDV));
-                    txtGiaDV.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cGiaDichVu));
-                    cboThoiGianBaoHanh.Text = Convert.ToString(gv_Data.GetRowCellValue(row, cThoiGianBH));
-                    chkTinhTrang.Checked = Convert.ToBoolean(gv_Data.GetRowCellValue(row, cThoiGianBH));
-                }
-            }
-            catch (Exception ex)
-            {
-
             }
         }
     }
