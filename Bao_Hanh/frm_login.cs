@@ -38,6 +38,7 @@ namespace Bao_Hanh
                 string sql = string.Format("select * From tbl_NhanVien where TenDangNhap = '{0}' AND MatKhau = '{1}'",
                     tendn, matkhau);
                 DataTable dt = new DataTable();
+                
                 dt = Util.GetData(sql);
                 if (dt != null && dt.Rows.Count > 0 )
                 {

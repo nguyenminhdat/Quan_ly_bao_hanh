@@ -23,7 +23,7 @@ namespace Bao_Hanh
             try
             {
                 DataTable dt = new DataTable();
-                string sql = "SELECT MaDV, TenDV, GiaDichVu, ThoiGianBH, TinhTrang FROM dbo.tbl_DichVu";
+                string sql = "SELECT tnv.TenDangNhap, tnv.MatKhau, tnv.HoTenNV, tnv.GioiTinh, tnv.NgaySinh, tnv.DiaChi, tnv.SDT, tnv.MaChucDanh FROM dbo.tbl_NhanVien AS tnv";
                 dt = Util.GetData(sql);
                 gc_Data.DataSource = dt;
             }
@@ -33,29 +33,34 @@ namespace Bao_Hanh
             }
         }
 
-        bool KiemTraKhiLuu(string madv, string tendv, string giadv, string thoigianbaohanh)
+        bool KiemTraKhiLuu(string tendangnhap, string matkhau, string hoten, string chucdanh)
         {
-            if (string.IsNullOrEmpty(madv))
+            if (string.IsNullOrEmpty(tendangnhap))
             {
-                MessageBox.Show("Chưa điền mã dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                MessageBox.Show("Chưa điền tên đăng nhập", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                 return false;
             }
-            if (string.IsNullOrEmpty(tendv))
+            if (string.IsNullOrEmpty(matkhau))
             {
-                MessageBox.Show("Chưa điền tên dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                MessageBox.Show("Chưa điền mật khẩu", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                 return false;
             }
-            if (string.IsNullOrEmpty(giadv.ToString()))
+            if (string.IsNullOrEmpty(hoten))
             {
-                MessageBox.Show("Chưa điền mã dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                MessageBox.Show("Chưa điền họ tên", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                 return false;
             }
-           
+            if (string.IsNullOrEmpty(chucdanh))
+            {
+                MessageBox.Show("Chưa chọn chức danh", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                return false;
+            }
+
             return true;
         }
         bool KiemTraTonTai(string madv)
         {
-            string sql = "select * from tbl_DichVu where MaDV = '" + madv + "'";
+            string sql = "select TenDangNhap from tbl_NhanVien where TenDangNhap = '" + madv + "'";
             DataTable dt = new DataTable();
             dt = Util.GetData(sql);
             return dt.Rows.Count > 0 ? true : false;
@@ -93,20 +98,23 @@ namespace Bao_Hanh
         {
             try
             {
-                string madv = txtMaDichVu.Text.Trim();
-                string tendv = txtTenDV.Text.Trim();
-                double giadv = Convert.ToDouble(txtGiaDV.Text);
-                int thoigianbh = Convert.ToInt32(cboThoiGianBaoHanh.Text);
-                bool tinhtrang = chkTinhTrang.Checked;
-                if (!KiemTraKhiLuu(madv, tendv, giadv.ToString(), thoigianbh.ToString()))
+                string tendangnhap = txt_TenDangNhap.Text.Trim();
+                string matkhau = txt_MatKhau.Text;
+                string hoten = txt_HoTen.Text.Trim();
+                string sdt = txt_SoDienThoai.Text.Trim();
+                string diachi = txt_DiaChi.Text.Trim();
+                string gioitinh = cbb_GioiTinh.Text.Trim();
+                string ngaysinh = dtp_NgaySinh.DateTime.ToString("yyyy-MM-dd");
+                string chucdanh = Convert.ToString(cbb_ChucDanh.SelectedValue);
+                if (!KiemTraKhiLuu(tendangnhap, matkhau, hoten, chucdanh))
                 {
                     //Nếu tồn tại thì thông báo cập nhật thông tin
-                    if (KiemTraTonTai(madv))
+                    if (KiemTraTonTai(tendangnhap))
                     {
                         if (MessageBox.Show("Thông tin này đã tồn tại, bạn có muốn cập nhật", "Thông báo", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
-                            string sql_capnhat = string.Format("update tbl_DichVu set TenDV = N'{1}', GiaDichVu = {2}, ThoiGianBH = '{3}', TinhTrang = {4} where MaDV = '{0}'",
-                                madv, tendv, giadv, thoigianbh, tinhtrang
+                            string sql_capnhat = string.Format("update tbl_NhanVien set MatKhau = N'{1}', HoTenNV = N'{2}', SDT = '{3}', GioiTinh = {4}, Ngaysinh = '{5}', DiaChi = N'{6}', MaChucDanh = '{7}',  where TenDangNhap = '{0}'",
+                                tendangnhap, matkhau, hoten, sdt, gioitinh, ngaysinh, diachi, chucdanh
                                 );
                             int capnhat = Util.RunSql(sql_capnhat);
                             if (capnhat > 0)
@@ -123,8 +131,9 @@ namespace Bao_Hanh
                     //Thêm mới thông tin
                     else
                     {
-                        string sql_themmoi = string.Format("insert into tbl_DichVu(MaDV, TenDV, GiaDichVu, ThoiGianBH, TinhTrang) values ('{0}',N'{1}',{2},'{3}',{4})",
-                                madv, tendv, giadv, thoigianbh, tinhtrang
+                        string sql_themmoi = string.Format("INSERT INTO dbo.tbl_NhanVien (TenDangNhap, MatKhau, HoTenNV, GioiTinh, NgaySinh, DiaChi, SDT, MaChucDanh) "
+                                            + " VALUES('{0}',N'{1}',N{2},'{3}',{4},N{5},{6},{7})",
+                                tendangnhap, matkhau, hoten, gioitinh, ngaysinh, diachi, sdt, chucdanh
                                 );
                         int themmoi = Util.RunSql(sql_themmoi);
                         if (themmoi > 0)
@@ -151,13 +160,13 @@ namespace Bao_Hanh
         {
             try
             {
-                string madv = txtMaDichVu.Text;
+                string madv = txt_TenDangNhap.Text;
                 if (string.IsNullOrEmpty(madv))
                 {
                     MessageBox.Show("Chưa chọn thông tin xóa", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                     return;
                 }
-                string sql = "delete tbl_DichVu where MaDV = '" + madv + "'";
+                string sql = "delete tbl_NhanVien where TenDangNhap = '" + madv + "'";
                 int isxoa = Util.RunSql(sql);
                 if (isxoa > 0)
                 {
@@ -180,17 +189,17 @@ namespace Bao_Hanh
         {
             try
             {
-                string madv = txtMaDichVu.Text.Trim();
-                string tendv = txtTenDV.Text.Trim();
+                string madv = txt_TenDangNhap.Text.Trim();
+                string tendv = txt_HoTen.Text.Trim();
 
-                string sql = "select * from tbl_DichVu where 1=1 ";
+                string sql = "SELECT tnv.TenDangNhap, tnv.MatKhau, tnv.HoTenNV, tnv.GioiTinh, tnv.NgaySinh, tnv.DiaChi, tnv.SDT, tnv.MaChucDanh FROM dbo.tbl_NhanVien AS tnv where 1=1 ";
                 if (madv != "")
                 {
-                    sql += "AND MaDV = '" + madv + "'";
+                    sql += "AND tnv.TenDangNhap = '" + madv + "'";
                 }
                 if (tendv != "")
                 {
-                    sql += "AND TenDV like N'%" + tendv + "%'";
+                    sql += "AND tnv.HoTenNVl like N'%" + tendv + "%'";
                 }
                 DataTable dt = new DataTable();
                 dt = Util.GetData(sql);
